@@ -27,7 +27,7 @@ public partial class Main : Form {
         var autorunMenuItem = new ToolStripMenuItem();
         autorunMenuItem.Text = "Autorun";
         autorunMenuItem.Click += AutorunClick;
-        autorunMenuItem.Checked = IsAutorun();
+        autorunMenuItem.Checked = AutorunManager.IsAutorun();
 
         systemTrayIcon.ContextMenuStrip = new ContextMenuStrip();
         systemTrayIcon.ContextMenuStrip.Items.Add(autorunMenuItem);
@@ -90,37 +90,12 @@ public partial class Main : Form {
             return;
         }
 
-        var registryKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
-        var appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-
-        if (registryKey is null || appName is null) {
-            return;
-        }
-
         if (!autorunMenuItem.Checked) {
-            registryKey.SetValue(appName, Application.ExecutablePath);
+            AutorunManager.SetAutorun();
         } else {
-            registryKey.DeleteValue(appName, false);
+            AutorunManager.RemoveAutorun();
         }
 
-        autorunMenuItem.Checked = IsAutorun();
+        autorunMenuItem.Checked = AutorunManager.IsAutorun();
     }
-
-
-
-
-
-    private bool IsAutorun() {
-        var registryKey = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", true);
-        var appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-
-        if (registryKey is null) {
-            return false;
-        }
-
-        return registryKey.GetValue(appName) is not null;
-    }
-
-
-
 }
